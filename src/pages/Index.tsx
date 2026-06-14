@@ -10,8 +10,57 @@ const CARS = [
     id: 1,
     name: 'Malibu',
     brand: 'Chevrolet',
-    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/43125963-734d-49d3-a489-a2b00151faa8.jpg',
-    price: 4200,
+    color: 'Серый',
+    colorHex: '#9CA3AF',
+    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/0c1ff4e5-8bd3-4c00-bd09-2509109a13bc.jpg',
+    priceDay: 3500,
+    priceWeek: 24500,
+    priceMonth: 100000,
+    type: 'Седан',
+    seats: 5,
+    transmission: 'Автомат',
+    rating: 4.9,
+  },
+  {
+    id: 2,
+    name: 'Malibu',
+    brand: 'Chevrolet',
+    color: 'Чёрный',
+    colorHex: '#1F2937',
+    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/96af8d6a-8a13-460c-9b7a-a97c91604478.jpg',
+    priceDay: 3500,
+    priceWeek: 24500,
+    priceMonth: 100000,
+    type: 'Седан',
+    seats: 5,
+    transmission: 'Автомат',
+    rating: 4.9,
+  },
+  {
+    id: 3,
+    name: 'Malibu',
+    brand: 'Chevrolet',
+    color: 'Чёрный',
+    colorHex: '#111827',
+    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/29efa3fc-62b1-4a5a-8be0-9065de118f04.jpg',
+    priceDay: 3500,
+    priceWeek: 24500,
+    priceMonth: 100000,
+    type: 'Седан',
+    seats: 5,
+    transmission: 'Автомат',
+    rating: 4.9,
+  },
+  {
+    id: 4,
+    name: 'Malibu',
+    brand: 'Chevrolet',
+    color: 'Тёмное золото',
+    colorHex: '#92702A',
+    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/d1e1b5d7-a9ab-482a-9c7c-050c4e97fd2f.jpg',
+    priceDay: 3500,
+    priceWeek: 24500,
+    priceMonth: 100000,
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
@@ -25,6 +74,12 @@ const SORTS = [
   { key: 'price-desc', label: 'Сначала дороже' },
   { key: 'rating', label: 'По рейтингу' },
 ];
+
+const TARIFF_TABS = [
+  { key: 'day', label: 'Сутки', field: 'priceDay' },
+  { key: 'week', label: 'Неделя', field: 'priceWeek' },
+  { key: 'month', label: 'Месяц', field: 'priceMonth' },
+] as const;
 
 const REVIEWS = [
   { name: 'Алексей М.', car: 'Sport GT', text: 'Машина — огонь! Брал на выходные, всё чисто, заправлено. Поддержка ответила мгновенно.', rating: 5 },
@@ -40,10 +95,19 @@ const BOOKINGS = [
 const Index = () => {
   const [type, setType] = useState('Все');
   const [sort, setSort] = useState('price-asc');
+  const [tariff, setTariff] = useState<'day' | 'week' | 'month'>('day');
+
+  const getPriceByTariff = (car: typeof CARS[0]) => {
+    if (tariff === 'week') return car.priceWeek;
+    if (tariff === 'month') return car.priceMonth;
+    return car.priceDay;
+  };
+
+  const tariffLabel = tariff === 'week' ? 'неделю' : tariff === 'month' ? 'месяц' : 'сутки';
 
   const filtered = CARS.filter((c) => type === 'Все' || c.type === type).sort((a, b) => {
-    if (sort === 'price-asc') return a.price - b.price;
-    if (sort === 'price-desc') return b.price - a.price;
+    if (sort === 'price-asc') return getPriceByTariff(a) - getPriceByTariff(b);
+    if (sort === 'price-desc') return getPriceByTariff(b) - getPriceByTariff(a);
     return b.rating - a.rating;
   });
 
@@ -172,28 +236,46 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-8">
-          <Icon name="ArrowDownUp" size={16} className="text-muted-foreground" />
-          {SORTS.map((s) => (
-            <button
-              key={s.key}
-              onClick={() => setSort(s.key)}
-              className={`text-sm font-medium transition-colors ${
-                sort === s.key ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <Icon name="ArrowDownUp" size={16} className="text-muted-foreground" />
+            {SORTS.map((s) => (
+              <button
+                key={s.key}
+                onClick={() => setSort(s.key)}
+                className={`text-sm font-medium transition-colors ${
+                  sort === s.key ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary border border-border">
+            {TARIFF_TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTariff(t.key)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  tariff === t.key
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filtered.map((car) => (
             <Card key={car.id} className="group overflow-hidden bg-card border-border rounded-3xl hover-scale">
               <div className="relative overflow-hidden">
                 <img src={car.img} alt={car.name} className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-semibold">
-                  {car.type}
+                <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-semibold">
+                  <span className="w-3 h-3 rounded-full border border-white/30" style={{ backgroundColor: car.colorHex }} />
+                  {car.color}
                 </div>
                 <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-semibold">
                   <Icon name="Star" size={12} className="text-primary fill-primary" />
@@ -209,8 +291,8 @@ const Index = () => {
                 </div>
                 <div className="flex items-end justify-between mt-6">
                   <div>
-                    <span className="font-display text-3xl font-bold text-primary">{car.price.toLocaleString()}</span>
-                    <span className="text-muted-foreground text-sm"> ₽/сутки</span>
+                    <span className="font-display text-3xl font-bold text-primary">{getPriceByTariff(car).toLocaleString()}</span>
+                    <span className="text-muted-foreground text-sm"> ₽/{tariffLabel}</span>
                   </div>
                   <Button className="rounded-full font-semibold">Забронировать</Button>
                 </div>
