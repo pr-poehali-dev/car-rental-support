@@ -81,21 +81,21 @@ const TARIFF_TABS = [
   { key: 'month', label: 'Месяц', field: 'priceMonth' },
 ] as const;
 
-const REVIEWS = [
-  { name: 'Алексей М.', car: 'Sport GT', text: 'Машина — огонь! Брал на выходные, всё чисто, заправлено. Поддержка ответила мгновенно.', rating: 5 },
-  { name: 'Марина К.', car: 'Urban X', text: 'Идеально для города и семьи. Оформление заняло 5 минут, без бумажной волокиты.', rating: 5 },
-  { name: 'Дмитрий В.', car: 'Business S', text: 'Брал на деловую поездку — выглядит солидно, едет мягко. Однозначно вернусь.', rating: 5 },
-];
+
 
 const BOOKINGS = [
   { car: 'Urban X', dates: '12–15 июня', status: 'Активна', price: 10200 },
   { car: 'Sport GT', dates: '2–4 мая', status: 'Завершена', price: 11800 },
 ];
 
+type Review = { name: string; car: string; text: string; rating: number };
+
 const Index = () => {
   const [type, setType] = useState('Все');
   const [sort, setSort] = useState('price-asc');
   const [tariff, setTariff] = useState<'day' | 'week' | 'month'>('day');
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewForm, setReviewForm] = useState({ name: '', car: 'Malibu (Серый)', text: '', rating: 5 });
 
   const getPriceByTariff = (car: typeof CARS[0]) => {
     if (tariff === 'week') return car.priceWeek;
@@ -130,7 +130,7 @@ const Index = () => {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow-primary">
               <Icon name="Car" size={20} className="text-primary-foreground" />
             </div>
-            <span className="font-display text-2xl font-bold tracking-tight">DRIVE</span>
+            <span className="font-display text-2xl font-bold tracking-tight">Drive_Car58rus</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             {nav.map(([label, id]) => (
@@ -336,7 +336,7 @@ const Index = () => {
                 <Input type="date" className="h-12 rounded-xl bg-secondary border-border" />
               </div>
               <select className="w-full h-12 rounded-xl bg-secondary border border-border px-3 text-sm">
-                {CARS.map((c) => <option key={c.id}>{c.name} — {c.price.toLocaleString()} ₽/сутки</option>)}
+                {CARS.map((c) => <option key={c.id}>{c.name} ({c.color}) — {c.priceDay.toLocaleString()} ₽/сутки</option>)}
               </select>
               <Button className="w-full h-12 rounded-xl font-semibold text-base">Отправить заявку</Button>
             </div>
@@ -347,27 +347,90 @@ const Index = () => {
       {/* Reviews */}
       <section id="reviews" className="container py-20 md:py-28">
         <h2 className="font-display text-4xl md:text-5xl font-bold uppercase text-center">Отзывы арендаторов</h2>
-        <p className="text-muted-foreground mt-2 text-center">Что говорят те, кто уже с нами проехал</p>
-        <div className="grid md:grid-cols-3 gap-6 mt-12">
-          {REVIEWS.map((r) => (
-            <Card key={r.name} className="p-7 bg-card border-border rounded-3xl">
-              <div className="flex gap-1 mb-4">
-                {[...Array(r.rating)].map((_, i) => (
-                  <Icon key={i} name="Star" size={16} className="text-primary fill-primary" />
+        <p className="text-muted-foreground mt-2 text-center">Поделитесь своим опытом аренды</p>
+
+        <div className="grid lg:grid-cols-2 gap-8 mt-12">
+          {/* Form */}
+          <Card className="p-8 bg-card border-border rounded-3xl">
+            <h3 className="font-display text-2xl font-bold mb-6">Оставить отзыв</h3>
+            <div className="space-y-4">
+              <Input
+                placeholder="Ваше имя"
+                value={reviewForm.name}
+                onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                className="h-12 rounded-xl bg-secondary border-border"
+              />
+              <select
+                value={reviewForm.car}
+                onChange={(e) => setReviewForm({ ...reviewForm, car: e.target.value })}
+                className="w-full h-12 rounded-xl bg-secondary border border-border px-3 text-sm text-foreground"
+              >
+                {CARS.map((c) => (
+                  <option key={c.id} value={`${c.name} (${c.color})`}>{c.name} — {c.color}</option>
+                ))}
+              </select>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Оценка:</span>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} onClick={() => setReviewForm({ ...reviewForm, rating: s })}>
+                    <Icon
+                      name="Star"
+                      size={22}
+                      className={s <= reviewForm.rating ? 'text-primary fill-primary' : 'text-muted-foreground'}
+                    />
+                  </button>
                 ))}
               </div>
-              <p className="text-foreground leading-relaxed">«{r.text}»</p>
-              <div className="flex items-center gap-3 mt-6 pt-6 border-t border-border">
-                <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center font-display font-bold text-primary">
-                  {r.name[0]}
-                </div>
-                <div>
-                  <div className="font-semibold">{r.name}</div>
-                  <div className="text-sm text-muted-foreground">арендовал {r.car}</div>
-                </div>
+              <Textarea
+                placeholder="Расскажите о своём опыте аренды..."
+                rows={4}
+                value={reviewForm.text}
+                onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                className="rounded-xl bg-secondary border-border"
+              />
+              <Button
+                className="w-full h-12 rounded-xl font-semibold text-base"
+                onClick={() => {
+                  if (!reviewForm.name.trim() || !reviewForm.text.trim()) return;
+                  setReviews([{ ...reviewForm }, ...reviews]);
+                  setReviewForm({ name: '', car: 'Malibu (Серый)', text: '', rating: 5 });
+                }}
+              >
+                Отправить отзыв
+              </Button>
+            </div>
+          </Card>
+
+          {/* Comments list */}
+          <div className="flex flex-col gap-4 max-h-[520px] overflow-y-auto pr-1">
+            {reviews.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full min-h-[240px] rounded-3xl border border-dashed border-border text-center p-8">
+                <Icon name="MessageSquare" size={40} className="text-muted-foreground mb-4" />
+                <p className="font-display text-xl font-bold">Пока нет отзывов</p>
+                <p className="text-muted-foreground text-sm mt-2">Будьте первым — поделитесь впечатлением!</p>
               </div>
-            </Card>
-          ))}
+            ) : (
+              reviews.map((r, i) => (
+                <Card key={i} className="p-6 bg-card border-border rounded-2xl">
+                  <div className="flex gap-1 mb-3">
+                    {[...Array(r.rating)].map((_, j) => (
+                      <Icon key={j} name="Star" size={14} className="text-primary fill-primary" />
+                    ))}
+                  </div>
+                  <p className="text-foreground leading-relaxed text-sm">«{r.text}»</p>
+                  <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border">
+                    <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center font-display font-bold text-primary text-sm">
+                      {r.name[0]}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-sm">{r.name}</div>
+                      <div className="text-xs text-muted-foreground">арендовал {r.car}</div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </section>
 
@@ -465,7 +528,7 @@ const Index = () => {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Icon name="Car" size={20} className="text-primary-foreground" />
             </div>
-            <span className="font-display text-2xl font-bold">DRIVE</span>
+            <span className="font-display text-2xl font-bold">Drive_Car58rus</span>
           </div>
           <p className="text-sm text-muted-foreground">© 2026 DRIVE — современная аренда автомобилей</p>
           <div className="flex gap-4">
