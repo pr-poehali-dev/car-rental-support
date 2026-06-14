@@ -217,7 +217,7 @@ const Index = () => {
             <div className="animate-fade-up">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary border border-border text-sm mb-6">
                 <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                Более 120 авто доступно прямо сейчас
+                4 автомобиля доступно прямо сейчас
               </div>
               <h1 className="font-display text-5xl md:text-7xl font-bold leading-[0.95] uppercase">
                 Аренда авто <br />
@@ -237,7 +237,7 @@ const Index = () => {
                 </Button>
               </div>
               <div className="mt-12 flex gap-8">
-                {[['120+', 'автомобилей'], ['10–21', 'поддержка МСК'], ['4.9', 'рейтинг']].map(([n, l]) => (
+                {[['4', 'автомобиля'], ['10–21', 'поддержка МСК'], ['4.9', 'рейтинг']].map(([n, l]) => (
                   <div key={l}>
                     <div className="font-display text-3xl font-bold text-primary">{n}</div>
                     <div className="text-sm text-muted-foreground">{l}</div>
@@ -700,7 +700,7 @@ const Index = () => {
               </button>
               <div className="flex items-center gap-3 p-5 rounded-2xl bg-primary/10 border border-primary/30">
                 <Icon name="Clock" size={20} className="text-primary" />
-                <span className="text-sm">Поддержка с <b>10:00 утра по МСК</b> до <b>9 вечера по МСК</b></span>
+                <span className="text-sm">Поддержка с <b>10 утра до 9 вечера по московскому времени</b></span>
               </div>
             </div>
           </div>
@@ -801,13 +801,7 @@ const Index = () => {
             <span className="font-display text-2xl font-bold">Drive_Car58rus</span>
           </div>
           <p className="text-sm text-muted-foreground">© 2026 DRIVE — современная аренда автомобилей</p>
-          <div className="flex gap-4">
-            {['Instagram', 'Send', 'Youtube'].map((ic) => (
-              <div key={ic} className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer">
-                <Icon name={ic} size={18} />
-              </div>
-            ))}
-          </div>
+
         </div>
       </footer>
     </div>
