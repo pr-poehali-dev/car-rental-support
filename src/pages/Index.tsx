@@ -363,13 +363,13 @@ const Index = () => {
               Возникли вопросы? Мы на связи круглосуточно. Звоните администратору или напишите нам.
             </p>
             <div className="mt-8 space-y-4">
-              <a href="tel:+78000000000" className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border hover:border-primary transition-colors">
+              <a href="tel:+79875139029" className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border hover:border-primary transition-colors">
                 <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center glow-primary">
                   <Icon name="Phone" size={20} className="text-primary-foreground" />
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Администратор</div>
-                  <div className="font-display text-xl font-bold">+7 (800) 000-00-00</div>
+                  <div className="font-display text-xl font-bold">+7 (987) 513-90-29</div>
                 </div>
               </a>
               <div className="grid grid-cols-2 gap-4">
