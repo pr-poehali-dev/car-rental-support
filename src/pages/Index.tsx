@@ -8,40 +8,18 @@ import { Card } from '@/components/ui/card';
 const CARS = [
   {
     id: 1,
-    name: 'Sport GT',
-    brand: 'Premium',
-    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/3a0c51b8-bf1c-469c-8507-ce7ca0ecb721.jpg',
-    price: 5900,
-    type: 'Спорт',
-    seats: 2,
-    transmission: 'Автомат',
-    rating: 4.9,
-  },
-  {
-    id: 2,
-    name: 'Urban X',
-    brand: 'Comfort',
-    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/a44d5f8a-8d62-4a89-bbe2-8409ec6de34d.jpg',
-    price: 3400,
-    type: 'Кроссовер',
-    seats: 5,
-    transmission: 'Автомат',
-    rating: 4.8,
-  },
-  {
-    id: 3,
-    name: 'Business S',
-    brand: 'Luxe',
-    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/227a5b2d-9629-481c-bff9-7345af95fec6.jpg',
-    price: 4700,
+    name: 'Malibu',
+    brand: 'Chevrolet',
+    img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/43125963-734d-49d3-a489-a2b00151faa8.jpg',
+    price: 4200,
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
-    rating: 5.0,
+    rating: 4.9,
   },
 ];
 
-const TYPES = ['Все', 'Спорт', 'Кроссовер', 'Седан'];
+const TYPES = ['Все', 'Седан'];
 const SORTS = [
   { key: 'price-asc', label: 'Сначала дешевле' },
   { key: 'price-desc', label: 'Сначала дороже' },
