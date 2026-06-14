@@ -13,12 +13,16 @@ const CARS = [
     color: 'Серый',
     colorHex: '#9CA3AF',
     img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/0c1ff4e5-8bd3-4c00-bd09-2509109a13bc.jpg',
-    priceDay: 3500,
-    priceWeek: 24500,
+    priceDay: 4500,
+    priceWeek: 27000,
     priceMonth: 100000,
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
+    year: 2021,
+    engine: '1.5 л, 160 л.с.',
+    drive: 'Передний',
+    features: ['Кондиционер', 'Камера заднего вида', 'Круиз-контроль', 'USB-зарядка', 'Подогрев сидений'],
   },
   {
     id: 2,
@@ -27,12 +31,16 @@ const CARS = [
     color: 'Чёрный',
     colorHex: '#1F2937',
     img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/96af8d6a-8a13-460c-9b7a-a97c91604478.jpg',
-    priceDay: 3500,
-    priceWeek: 24500,
+    priceDay: 4500,
+    priceWeek: 27000,
     priceMonth: 100000,
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
+    year: 2022,
+    engine: '1.5 л, 160 л.с.',
+    drive: 'Передний',
+    features: ['Кондиционер', 'Камера заднего вида', 'Bluetooth', 'USB-зарядка', 'Подогрев сидений'],
   },
   {
     id: 3,
@@ -41,12 +49,16 @@ const CARS = [
     color: 'Чёрный',
     colorHex: '#111827',
     img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/29efa3fc-62b1-4a5a-8be0-9065de118f04.jpg',
-    priceDay: 3500,
-    priceWeek: 24500,
+    priceDay: 4500,
+    priceWeek: 27000,
     priceMonth: 100000,
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
+    year: 2020,
+    engine: '1.5 л, 160 л.с.',
+    drive: 'Передний',
+    features: ['Кондиционер', 'Парктроник', 'Bluetooth', 'USB-зарядка'],
   },
   {
     id: 4,
@@ -55,12 +67,16 @@ const CARS = [
     color: 'Тёмное золото',
     colorHex: '#92702A',
     img: 'https://cdn.poehali.dev/projects/6de722bd-b919-42dd-9f2b-98ed7ca9fcf3/files/d1e1b5d7-a9ab-482a-9c7c-050c4e97fd2f.jpg',
-    priceDay: 3500,
-    priceWeek: 24500,
+    priceDay: 4500,
+    priceWeek: 27000,
     priceMonth: 100000,
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
+    year: 2023,
+    engine: '1.5 л, 160 л.с.',
+    drive: 'Передний',
+    features: ['Кондиционер', 'Камера заднего вида', 'Круиз-контроль', 'Bluetooth', 'USB-зарядка', 'Подогрев сидений'],
   },
 ];
 
@@ -106,6 +122,9 @@ const Index = () => {
     { car: 'Malibu (Серый)', dates: '12–15 июня 2026', status: 'Активна', price: 10500 },
     { car: 'Malibu (Чёрный)', dates: '2–4 мая 2026', status: 'Завершена', price: 7000 },
   ]);
+
+  // Модальное окно авто
+  const [selectedCar, setSelectedCar] = useState<typeof CARS[0] | null>(null);
 
   // Рейтинги авто { carId: { sum, count } }
   const [carRatings, setCarRatings] = useState<Record<number, { sum: number; count: number }>>({});
@@ -212,8 +231,9 @@ const Index = () => {
 
       {/* Hero */}
       <section className="relative pt-16 grid-bg">
-        <div className="container relative py-20 md:py-28">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container relative py-20 md:py-24">
+          {/* Top block */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
             <div className="animate-fade-up">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary border border-border text-sm mb-6">
                 <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
@@ -236,26 +256,128 @@ const Index = () => {
                   Связаться
                 </Button>
               </div>
-              <div className="mt-12 flex gap-8">
-                {[['4', 'автомобиля']].map(([n, l]) => (
-                  <div key={l}>
-                    <div className="font-display text-3xl font-bold text-primary">{n}</div>
-                    <div className="text-sm text-muted-foreground">{l}</div>
-                  </div>
-                ))}
+              {/* Скидка */}
+              <div className="mt-8 inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-accent/10 border border-accent/30">
+                <Icon name="Tag" size={18} className="text-accent" />
+                <span className="text-sm">
+                  <b className="text-accent">Скидка при аренде на месяц</b> — всего <b className="text-foreground">3 500 ₽/сутки</b> вместо 4 500 ₽
+                </span>
               </div>
             </div>
             <div className="relative animate-fade-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-10 bg-primary/20 blur-3xl rounded-full" />
               <img
                 src={CARS[0].img}
-                alt="Sport GT"
+                alt="Malibu"
                 className="relative rounded-3xl w-full object-cover animate-float"
               />
             </div>
           </div>
+
+          {/* Cars preview on hero */}
+          <div>
+            <p className="text-muted-foreground text-sm mb-4 font-medium">Нажмите на авто, чтобы узнать подробнее:</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {CARS.map((car) => (
+                <button
+                  key={car.id}
+                  onClick={() => setSelectedCar(car)}
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-primary transition-all duration-300 hover:scale-105 text-left"
+                >
+                  <img src={car.img} alt={car.name} className="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <div className="p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0" style={{ backgroundColor: car.colorHex }} />
+                      <span className="text-xs text-muted-foreground">{car.color}</span>
+                    </div>
+                    <div className="font-display font-bold text-sm">{car.brand} {car.name}</div>
+                    <div className="text-primary text-xs font-semibold mt-1">{car.priceDay.toLocaleString()} ₽/сутки</div>
+                  </div>
+                  <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full">
+                      Подробнее
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Car Modal */}
+      {selectedCar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setSelectedCar(null)}>
+          <Card className="w-full max-w-2xl bg-card border-border rounded-3xl overflow-hidden animate-fade-up" onClick={(e) => e.stopPropagation()}>
+            <div className="relative">
+              <img src={selectedCar.img} alt={selectedCar.name} className="w-full h-64 object-cover" />
+              <button
+                onClick={() => setSelectedCar(null)}
+                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background/80 backdrop-blur flex items-center justify-center hover:bg-background transition-colors"
+              >
+                <Icon name="X" size={18} />
+              </button>
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-semibold">
+                <span className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: selectedCar.colorHex }} />
+                {selectedCar.color}
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">{selectedCar.brand}</div>
+              <h2 className="font-display text-3xl font-bold mt-1">{selectedCar.name} · {selectedCar.year} г.</h2>
+
+              {/* Specs */}
+              <div className="grid grid-cols-3 gap-3 mt-5">
+                {[
+                  ['Users', `${selectedCar.seats} мест`],
+                  ['Settings2', selectedCar.transmission],
+                  ['Gauge', selectedCar.engine],
+                  ['Navigation', selectedCar.drive],
+                  ['Calendar', `${selectedCar.year} г.`],
+                  ['Car', selectedCar.type],
+                ].map(([ic, val]) => (
+                  <div key={val} className="flex items-center gap-2 p-3 rounded-xl bg-secondary">
+                    <Icon name={ic} size={14} className="text-primary shrink-0" />
+                    <span className="text-xs font-medium">{val}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Features */}
+              <div className="mt-5">
+                <div className="text-sm font-semibold mb-2">Комплектация:</div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedCar.features.map((f) => (
+                    <span key={f} className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">{f}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="mt-5 grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-secondary text-center">
+                  <div className="font-display text-xl font-bold text-primary">{selectedCar.priceDay.toLocaleString()} ₽</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">в сутки</div>
+                </div>
+                <div className="p-3 rounded-xl bg-secondary text-center">
+                  <div className="font-display text-xl font-bold text-primary">{selectedCar.priceWeek.toLocaleString()} ₽</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">в неделю</div>
+                </div>
+                <div className="p-3 rounded-xl bg-accent/10 border border-accent/30 text-center relative">
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-semibold whitespace-nowrap">Выгодно</div>
+                  <div className="font-display text-xl font-bold text-accent">{selectedCar.priceMonth.toLocaleString()} ₽</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">в месяц (~{Math.round(selectedCar.priceMonth/30).toLocaleString()} ₽/сут)</div>
+                </div>
+              </div>
+
+              <Button className="w-full h-12 rounded-xl font-semibold text-base mt-5" onClick={() => { setSelectedCar(null); scrollTo('booking'); }}>
+                Забронировать этот автомобиль
+                <Icon name="ArrowRight" size={18} className="ml-2" />
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Marquee */}
       <div className="border-y border-border py-4 bg-secondary/50 overflow-hidden">
