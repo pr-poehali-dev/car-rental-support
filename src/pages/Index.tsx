@@ -19,7 +19,6 @@ const CARS = [
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
-    rating: 4.9,
   },
   {
     id: 2,
@@ -34,7 +33,6 @@ const CARS = [
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
-    rating: 4.9,
   },
   {
     id: 3,
@@ -49,7 +47,6 @@ const CARS = [
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
-    rating: 4.9,
   },
   {
     id: 4,
@@ -64,7 +61,6 @@ const CARS = [
     type: 'Седан',
     seats: 5,
     transmission: 'Автомат',
-    rating: 4.9,
   },
 ];
 
@@ -83,13 +79,10 @@ const TARIFF_TABS = [
 
 
 
-const BOOKINGS = [
-  { car: 'Urban X', dates: '12–15 июня', status: 'Активна', price: 10200 },
-  { car: 'Sport GT', dates: '2–4 мая', status: 'Завершена', price: 11800 },
-];
 
 type Review = { name: string; car: string; text: string; rating: number };
 type ChatMsg = { from: 'user' | 'admin'; text: string; time: string };
+type User = { name: string; phone: string; email: string };
 
 const Index = () => {
   const [type, setType] = useState('Все');
@@ -102,6 +95,38 @@ const Index = () => {
     { from: 'admin', text: 'Здравствуйте! Чем могу помочь?', time: '10:00' },
   ]);
   const [chatInput, setChatInput] = useState('');
+
+  // Личный кабинет
+  const [user, setUser] = useState<User | null>(null);
+  const [cabinetTab, setCabinetTab] = useState<'login' | 'register'>('login');
+  const [loginForm, setLoginForm] = useState({ phone: '', password: '' });
+  const [regForm, setRegForm] = useState({ name: '', phone: '', email: '', password: '' });
+  const [regError, setRegError] = useState('');
+  const [myBookings] = useState([
+    { car: 'Malibu (Серый)', dates: '12–15 июня 2026', status: 'Активна', price: 10500 },
+    { car: 'Malibu (Чёрный)', dates: '2–4 мая 2026', status: 'Завершена', price: 7000 },
+  ]);
+
+  // Рейтинги авто { carId: { sum, count } }
+  const [carRatings, setCarRatings] = useState<Record<number, { sum: number; count: number }>>({});
+  const [userRatings, setUserRatings] = useState<Record<number, number>>({});
+
+  const getAvgRating = (id: number) => {
+    const r = carRatings[id];
+    if (!r || r.count === 0) return null;
+    return (r.sum / r.count).toFixed(1);
+  };
+
+  const ratecar = (carId: number, stars: number) => {
+    const prev = userRatings[carId];
+    setCarRatings((cr) => {
+      const existing = cr[carId] || { sum: 0, count: 0 };
+      const newSum = existing.sum - (prev || 0) + stars;
+      const newCount = prev ? existing.count : existing.count + 1;
+      return { ...cr, [carId]: { sum: newSum, count: newCount } };
+    });
+    setUserRatings((ur) => ({ ...ur, [carId]: stars }));
+  };
 
   const sendMessage = () => {
     if (!chatInput.trim()) return;
@@ -117,6 +142,20 @@ const Index = () => {
     }, 1000);
   };
 
+  const handleRegister = () => {
+    if (!regForm.name || !regForm.phone || !regForm.password) {
+      setRegError('Заполните все обязательные поля');
+      return;
+    }
+    setUser({ name: regForm.name, phone: regForm.phone, email: regForm.email });
+    setRegError('');
+  };
+
+  const handleLogin = () => {
+    if (!loginForm.phone || !loginForm.password) return;
+    setUser({ name: 'Арендатор', phone: loginForm.phone, email: '' });
+  };
+
   const getPriceByTariff = (car: typeof CARS[0]) => {
     if (tariff === 'week') return car.priceWeek;
     if (tariff === 'month') return car.priceMonth;
@@ -128,7 +167,9 @@ const Index = () => {
   const filtered = CARS.filter((c) => type === 'Все' || c.type === type).sort((a, b) => {
     if (sort === 'price-asc') return getPriceByTariff(a) - getPriceByTariff(b);
     if (sort === 'price-desc') return getPriceByTariff(b) - getPriceByTariff(a);
-    return b.rating - a.rating;
+    const ra = getAvgRating(a.id) ? parseFloat(getAvgRating(a.id)!) : 0;
+    const rb = getAvgRating(b.id) ? parseFloat(getAvgRating(b.id)!) : 0;
+    return rb - ra;
   });
 
   const nav = [
@@ -299,7 +340,7 @@ const Index = () => {
                 </div>
                 <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1 rounded-full bg-background/80 backdrop-blur text-xs font-semibold">
                   <Icon name="Star" size={12} className="text-primary fill-primary" />
-                  {car.rating}
+                  {getAvgRating(car.id) ?? '—'}
                 </div>
               </div>
               <div className="p-6">
@@ -309,7 +350,17 @@ const Index = () => {
                   <span className="flex items-center gap-1"><Icon name="Users" size={14} />{car.seats} мест</span>
                   <span className="flex items-center gap-1"><Icon name="Settings2" size={14} />{car.transmission}</span>
                 </div>
-                <div className="flex items-end justify-between mt-6">
+                <div className="flex items-center gap-1 mt-3">
+                  {[1,2,3,4,5].map((s) => (
+                    <button key={s} onClick={() => ratecar(car.id, s)} title="Оценить">
+                      <Icon name="Star" size={16} className={s <= (userRatings[car.id] || 0) ? 'text-primary fill-primary' : 'text-muted-foreground'} />
+                    </button>
+                  ))}
+                  <span className="text-xs text-muted-foreground ml-1">
+                    {carRatings[car.id]?.count ? `${carRatings[car.id].count} оцен.` : 'Нет оценок'}
+                  </span>
+                </div>
+                <div className="flex items-end justify-between mt-4">
                   <div>
                     <span className="font-display text-3xl font-bold text-primary">{getPriceByTariff(car).toLocaleString()}</span>
                     <span className="text-muted-foreground text-sm"> ₽/{tariffLabel}</span>
@@ -458,42 +509,162 @@ const Index = () => {
       <section id="cabinet" className="bg-secondary/40 border-y border-border py-20 md:py-28">
         <div className="container">
           <h2 className="font-display text-4xl md:text-5xl font-bold uppercase">Личный кабинет</h2>
-          <p className="text-muted-foreground mt-2">Ваши бронирования и история аренд</p>
-          <div className="grid md:grid-cols-3 gap-6 mt-10">
-            {[['Активные', '1', 'Car'], ['Всего поездок', '7', 'Route'], ['Бонусы', '2 400 ₽', 'Gift']].map(([l, v, ic]) => (
-              <Card key={l} className="p-6 bg-card border-border rounded-3xl flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
-                  <Icon name={ic} size={22} className="text-primary" />
+          <p className="text-muted-foreground mt-2">Управляйте бронированиями и историей аренд</p>
+
+          {!user ? (
+            <div className="mt-10 max-w-md mx-auto">
+              {/* Tabs */}
+              <div className="flex p-1 bg-secondary rounded-2xl mb-6">
+                {(['login', 'register'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setCabinetTab(tab)}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                      cabinetTab === tab ? 'bg-card text-foreground shadow' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {tab === 'login' ? 'Войти' : 'Регистрация'}
+                  </button>
+                ))}
+              </div>
+
+              {cabinetTab === 'login' ? (
+                <Card className="p-8 bg-card border-border rounded-3xl">
+                  <h3 className="font-display text-2xl font-bold mb-6">Вход в кабинет</h3>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Телефон"
+                      value={loginForm.phone}
+                      onChange={(e) => setLoginForm({ ...loginForm, phone: e.target.value })}
+                      className="h-12 rounded-xl bg-secondary border-border"
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Пароль"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                      className="h-12 rounded-xl bg-secondary border-border"
+                    />
+                    <Button onClick={handleLogin} className="w-full h-12 rounded-xl font-semibold text-base">
+                      Войти
+                    </Button>
+                    <button
+                      onClick={() => setCabinetTab('register')}
+                      className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Нет аккаунта? Зарегистрироваться
+                    </button>
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-8 bg-card border-border rounded-3xl">
+                  <h3 className="font-display text-2xl font-bold mb-6">Создать аккаунт</h3>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Имя *"
+                      value={regForm.name}
+                      onChange={(e) => setRegForm({ ...regForm, name: e.target.value })}
+                      className="h-12 rounded-xl bg-secondary border-border"
+                    />
+                    <Input
+                      placeholder="Телефон *"
+                      value={regForm.phone}
+                      onChange={(e) => setRegForm({ ...regForm, phone: e.target.value })}
+                      className="h-12 rounded-xl bg-secondary border-border"
+                    />
+                    <Input
+                      placeholder="Email (необязательно)"
+                      value={regForm.email}
+                      onChange={(e) => setRegForm({ ...regForm, email: e.target.value })}
+                      className="h-12 rounded-xl bg-secondary border-border"
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Пароль *"
+                      value={regForm.password}
+                      onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
+                      className="h-12 rounded-xl bg-secondary border-border"
+                    />
+                    {regError && <p className="text-destructive text-sm">{regError}</p>}
+                    <Button onClick={handleRegister} className="w-full h-12 rounded-xl font-semibold text-base">
+                      Зарегистрироваться
+                    </Button>
+                    <button
+                      onClick={() => setCabinetTab('login')}
+                      className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Уже есть аккаунт? Войти
+                    </button>
+                  </div>
+                </Card>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Profile header */}
+              <div className="flex items-center justify-between mt-10 mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                    <span className="font-display text-2xl font-bold text-primary">{user.name[0]}</span>
+                  </div>
+                  <div>
+                    <div className="font-display text-2xl font-bold">{user.name}</div>
+                    <div className="text-sm text-muted-foreground">{user.phone}</div>
+                    {user.email && <div className="text-sm text-muted-foreground">{user.email}</div>}
+                  </div>
                 </div>
-                <div>
-                  <div className="font-display text-2xl font-bold">{v}</div>
-                  <div className="text-sm text-muted-foreground">{l}</div>
+                <Button variant="outline" onClick={() => setUser(null)} className="rounded-full border-border">
+                  <Icon name="LogOut" size={16} className="mr-2" />
+                  Выйти
+                </Button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid md:grid-cols-3 gap-6 mb-6">
+                {[
+                  ['Активные аренды', myBookings.filter(b => b.status === 'Активна').length.toString(), 'Car'],
+                  ['Всего поездок', myBookings.length.toString(), 'Route'],
+                  ['Потрачено', myBookings.reduce((s,b) => s + b.price, 0).toLocaleString() + ' ₽', 'CreditCard'],
+                ].map(([l, v, ic]) => (
+                  <Card key={l} className="p-6 bg-card border-border rounded-3xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                      <Icon name={ic} size={22} className="text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-display text-2xl font-bold">{v}</div>
+                      <div className="text-sm text-muted-foreground">{l}</div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Bookings */}
+              <Card className="bg-card border-border rounded-3xl overflow-hidden">
+                <div className="p-6 border-b border-border font-display text-xl font-bold">История бронирований</div>
+                <div className="divide-y divide-border">
+                  {myBookings.map((b, i) => (
+                    <div key={i} className="flex items-center justify-between p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                          <Icon name="Car" size={18} className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-semibold">{b.car}</div>
+                          <div className="text-sm text-muted-foreground">{b.dates}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="font-semibold">{b.price.toLocaleString()} ₽</span>
+                        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                          b.status === 'Активна' ? 'bg-accent/20 text-accent' : 'bg-secondary text-muted-foreground'
+                        }`}>{b.status}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </Card>
-            ))}
-          </div>
-          <Card className="mt-6 bg-card border-border rounded-3xl overflow-hidden">
-            <div className="p-6 border-b border-border font-display text-xl font-bold">История бронирований</div>
-            <div className="divide-y divide-border">
-              {BOOKINGS.map((b, i) => (
-                <div key={i} className="flex items-center justify-between p-6">
-                  <div className="flex items-center gap-4">
-                    <Icon name="Car" size={20} className="text-primary" />
-                    <div>
-                      <div className="font-semibold">{b.car}</div>
-                      <div className="text-sm text-muted-foreground">{b.dates}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <span className="font-semibold">{b.price.toLocaleString()} ₽</span>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                      b.status === 'Активна' ? 'bg-accent/20 text-accent' : 'bg-secondary text-muted-foreground'
-                    }`}>{b.status}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+            </>
+          )}
         </div>
       </section>
 
