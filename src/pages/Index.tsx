@@ -89,6 +89,7 @@ const BOOKINGS = [
 ];
 
 type Review = { name: string; car: string; text: string; rating: number };
+type ChatMsg = { from: 'user' | 'admin'; text: string; time: string };
 
 const Index = () => {
   const [type, setType] = useState('Все');
@@ -96,6 +97,25 @@ const Index = () => {
   const [tariff, setTariff] = useState<'day' | 'week' | 'month'>('day');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewForm, setReviewForm] = useState({ name: '', car: 'Malibu (Серый)', text: '', rating: 5 });
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([
+    { from: 'admin', text: 'Здравствуйте! Чем могу помочь?', time: '10:00' },
+  ]);
+  const [chatInput, setChatInput] = useState('');
+
+  const sendMessage = () => {
+    if (!chatInput.trim()) return;
+    const now = new Date();
+    const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setChatMessages((prev) => [...prev, { from: 'user', text: chatInput.trim(), time }]);
+    setChatInput('');
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        { from: 'admin', text: 'Спасибо за обращение! Администратор ответит вам в ближайшее время (поддержка работает с 10:00 до 21:00 по МСК).', time },
+      ]);
+    }, 1000);
+  };
 
   const getPriceByTariff = (car: typeof CARS[0]) => {
     if (tariff === 'week') return car.priceWeek;
@@ -163,7 +183,7 @@ const Index = () => {
                 <span className="text-gradient">без границ</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground max-w-md">
-                Выбирай машину мечты, бронируй за пару минут и отправляйся в путь. Полная поддержка 24/7.
+                Выбирай машину мечты, бронируй за пару минут и отправляйся в путь. Поддержка с 10:00 до 21:00 по МСК.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button size="lg" onClick={() => scrollTo('catalog')} className="rounded-full font-semibold text-base h-12 px-8">
@@ -176,7 +196,7 @@ const Index = () => {
                 </Button>
               </div>
               <div className="mt-12 flex gap-8">
-                {[['120+', 'автомобилей'], ['24/7', 'поддержка'], ['4.9', 'рейтинг']].map(([n, l]) => (
+                {[['120+', 'автомобилей'], ['10–21', 'поддержка МСК'], ['4.9', 'рейтинг']].map(([n, l]) => (
                   <div key={l}>
                     <div className="font-display text-3xl font-bold text-primary">{n}</div>
                     <div className="text-sm text-muted-foreground">{l}</div>
@@ -201,7 +221,7 @@ const Index = () => {
         <div className="flex w-max animate-marquee">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex items-center">
-              {['Без залога', 'Доставка авто', 'Полная страховка', 'Поддержка 24/7', 'Чистый салон', 'Полный бак'].map((t) => (
+              {['Без залога', 'Доставка авто', 'Полная страховка', 'Режим работы 10:00–21:00', 'Чистый салон', 'Полный бак'].map((t) => (
                 <span key={t} className="flex items-center font-display text-2xl uppercase font-semibold px-8 text-muted-foreground">
                   {t}
                   <Icon name="Sparkles" size={18} className="ml-8 text-primary" />
@@ -483,7 +503,7 @@ const Index = () => {
           <div>
             <h2 className="font-display text-4xl md:text-5xl font-bold uppercase">Тех. поддержка</h2>
             <p className="text-muted-foreground mt-4 max-w-md">
-              Возникли вопросы? Мы на связи круглосуточно. Звоните администратору или напишите нам.
+              Поддержка работает с <b className="text-foreground">10:00 до 21:00 по МСК</b>. Вы можете обратиться как по телефону, так и в чат с администратором.
             </p>
             <div className="mt-8 space-y-4">
               <a href="tel:+79875139029" className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border hover:border-primary transition-colors">
@@ -495,31 +515,110 @@ const Index = () => {
                   <div className="font-display text-xl font-bold">+7 (987) 513-90-29</div>
                 </div>
               </a>
-              <div className="grid grid-cols-2 gap-4">
-                {[['MessageCircle', 'Telegram'], ['Mail', 'Почта']].map(([ic, l]) => (
-                  <div key={l} className="flex items-center gap-3 p-5 rounded-2xl bg-card border border-border">
-                    <Icon name={ic} size={20} className="text-primary" />
-                    <span className="font-semibold">{l}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-3 p-5 rounded-2xl bg-accent/10 border border-accent/30">
-                <Icon name="Clock" size={20} className="text-accent" />
-                <span className="text-sm">Среднее время ответа — <b>под 2 минуты</b></span>
+              <button
+                onClick={() => setChatOpen(true)}
+                className="w-full flex items-center gap-4 p-5 rounded-2xl bg-card border border-border hover:border-primary transition-colors text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Icon name="MessageSquare" size={20} className="text-accent" />
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Онлайн-чат</div>
+                  <div className="font-display text-xl font-bold">Написать администратору</div>
+                </div>
+              </button>
+              <div className="flex items-center gap-3 p-5 rounded-2xl bg-primary/10 border border-primary/30">
+                <Icon name="Clock" size={20} className="text-primary" />
+                <span className="text-sm">Поддержка с <b>10:00 утра по МСК</b> до <b>9 вечера по МСК</b></span>
               </div>
             </div>
           </div>
           <Card className="p-8 bg-card border-border rounded-3xl">
-            <h3 className="font-display text-2xl font-bold mb-6">Написать в поддержку</h3>
-            <div className="space-y-4">
-              <Input placeholder="Ваше имя" className="h-12 rounded-xl bg-secondary border-border" />
-              <Input placeholder="Телефон или email" className="h-12 rounded-xl bg-secondary border-border" />
-              <Textarea placeholder="Опишите ваш вопрос..." rows={4} className="rounded-xl bg-secondary border-border" />
-              <Button className="w-full h-12 rounded-xl font-semibold text-base">Отправить сообщение</Button>
+            <h3 className="font-display text-2xl font-bold mb-2">Чат с администратором</h3>
+            <p className="text-sm text-muted-foreground mb-6">Режим работы: 10:00–21:00 по МСК</p>
+            <div className="flex flex-col gap-3 h-64 overflow-y-auto mb-4 pr-1">
+              {chatMessages.map((m, i) => (
+                <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
+                    m.from === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-sm'
+                      : 'bg-secondary text-foreground rounded-bl-sm'
+                  }`}>
+                    <p>{m.text}</p>
+                    <p className={`text-xs mt-1 ${m.from === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{m.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Напишите сообщение..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                className="h-11 rounded-xl bg-secondary border-border"
+              />
+              <Button onClick={sendMessage} className="h-11 w-11 rounded-xl p-0 shrink-0">
+                <Icon name="Send" size={16} />
+              </Button>
             </div>
           </Card>
         </div>
       </section>
+
+      {/* Floating Chat Button */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {chatOpen && (
+          <Card className="w-80 bg-card border-border rounded-3xl shadow-2xl overflow-hidden animate-fade-up">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-primary/10">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Icon name="User" size={16} className="text-primary" />
+                </div>
+                <div>
+                  <div className="font-semibold text-sm">Администратор</div>
+                  <div className="text-xs text-muted-foreground">10:00–21:00 МСК</div>
+                </div>
+              </div>
+              <button onClick={() => setChatOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <Icon name="X" size={18} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-3 h-56 overflow-y-auto p-4">
+              {chatMessages.map((m, i) => (
+                <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
+                    m.from === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-sm'
+                      : 'bg-secondary text-foreground rounded-bl-sm'
+                  }`}>
+                    <p>{m.text}</p>
+                    <p className={`text-xs mt-0.5 ${m.from === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{m.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 p-3 border-t border-border">
+              <Input
+                placeholder="Сообщение..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                className="h-9 rounded-xl bg-secondary border-border text-sm"
+              />
+              <Button onClick={sendMessage} className="h-9 w-9 rounded-xl p-0 shrink-0">
+                <Icon name="Send" size={14} />
+              </Button>
+            </div>
+          </Card>
+        )}
+        <button
+          onClick={() => setChatOpen(!chatOpen)}
+          className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-lg glow-primary hover:scale-110 transition-transform"
+        >
+          <Icon name={chatOpen ? 'X' : 'MessageSquare'} size={24} className="text-primary-foreground" />
+        </button>
+      </div>
 
       {/* Footer */}
       <footer className="border-t border-border py-12">
